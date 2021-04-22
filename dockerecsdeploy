@@ -1,0 +1,32 @@
+#!/bin/bash
+export IMAGE_NAME=$2
+export ECS_SERVICE_NAME=$2
+export ECS_TASK_NAME=$2
+
+docker build -t "${IMAGE_NAME}"  . -f $3
+#Login via login.sh
+aws ecr get-login --region ap-southeast-1 | sed 's/ -e //g' | sed 's/none//g' > login.sh
+chmod a+x login.sh
+./login.sh
+
+# delete ecr and create again
+aws ecr delete-repository --repository-name $2 --force
+aws ecr create-repository --repository-name $2
+# end delete ecr and create again
+
+docker tag "${IMAGE_NAME}":latest "${ECR_URL}"/"${IMAGE_NAME}":"${COMMIT_ID}"
+docker push "${ECR_URL}"/"${IMAGE_NAME}":"${COMMIT_ID}"
+aws ecs list-clusters | grep "${ECS_CLUSTER_NAME}" || aws ecs create-cluster --cluster-name "${ECS_CLUSTER_NAME}"
+
+echo "MEMORY_SIZE:" "${MEMORY_SIZE}"
+export TASK_DEFINITION='[{"name":"app","image":"'${ECR_URL}/${IMAGE_NAME}:${COMMIT_ID}'","memory":'${MEMORY_SIZE}',"portMappings":[{"containerPort":4000,"hostPort":'$1',"protocol":"tcp"}], "environment":[{ "name" : "ASPNETCORE_ENVIRONMENT", "value":"'${ENV}'"}]}]'
+echo "TASK_DEFINITION:" "${TASK_DEFINITION}"
+
+export TASK_VERSION=$(aws ecs register-task-definition --family "${ECS_TASK_NAME}" --container-definitions "${TASK_DEFINITION}" | jq --raw-output '.taskDefinition.revision')
+echo "TASK_VERSION:" "${TASK_VERSION}"
+
+aws ecs list-services --cluster "${ECS_CLUSTER_NAME}"  | grep "${ECS_SERVICE_NAME}" || aws ecs create-service --service-name "${ECS_SERVICE_NAME}" --cluster "${ECS_CLUSTER_NAME}" --task-definition "${ECS_TASK_NAME}" --desired-count 1
+aws ecs update-service --cluster "${ECS_CLUSTER_NAME}" --service "${ECS_SERVICE_NAME}" --task-definition "${ECS_TASK_NAME}:${TASK_VERSION}"
+
+export STOP_TASK_RESULT=$(aws ecs stop-task --cluster "${ECS_CLUSTER_NAME}"  --task $(aws ecs list-tasks --cluster  "${ECS_CLUSTER_NAME}" --service "${ECS_SERVICE_NAME}" --output text --query taskArns[0]))
+echo "STOP_TASK_RESULT:" "${STOP_TASK_RESULT}"
