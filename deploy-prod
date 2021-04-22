@@ -1,6 +1,6 @@
-export ECS_CLUSTER_NAME=cofarm-web
 export COMMIT_ID="c854546f5f1eef0c79dee5d4f9eb6e8ba640be62"
+export ECS_CLUSTER_NAME=cofarm-production
 export ECR_URL="682911070351.dkr.ecr.ap-southeast-1.amazonaws.com"
 export MEMORY_SIZE=250
 export ENV=Production
-bash dockerecsdeploy 80 cofarm-web-production Dockerfile.Production
+bash dockerecsdeploy 80 cofarm-web-production Dockerfile

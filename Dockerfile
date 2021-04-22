@@ -2,14 +2,14 @@ FROM node:12 as buildContainer
 WORKDIR /app
 
 COPY ./package.json ./package-lock.json /app/
-RUN yarn 
+RUN npm i 
 RUN npx ngcc
 
 COPY . /app
 
 # max-old-space is needed to avoid any compilation issues because of missing memory
 ENV NODE_OPTIONS --max-old-space-size=2048
-RUN yarn build-prod
+RUN npm run build:ssr-prod
 
 FROM node:12-alpine
 
