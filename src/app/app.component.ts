@@ -39,7 +39,12 @@ export class AppComponent implements OnDestroy {
   }
 
   signInWithFB(): void {
-    this.authService.signIn(FacebookLoginProvider.PROVIDER_ID);
+    const fbLoginOptions = {
+      scope: 'public_profile,email',
+      return_scopes: true,
+      enable_profile_selector: true,
+    };
+    this.authService.signIn(FacebookLoginProvider.PROVIDER_ID, fbLoginOptions);
   }
 
   signOut(): void {
