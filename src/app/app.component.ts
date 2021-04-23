@@ -1,10 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import {
-  FacebookLoginProvider,
-  GoogleLoginProvider,
-  SocialAuthService,
-  SocialUser,
-} from 'angularx-social-login';
+import { SocialAuthService, SocialUser } from 'angularx-social-login';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 @Component({
@@ -27,24 +22,6 @@ export class AppComponent implements OnDestroy {
         this.user = user;
         this.loggedIn = user != null;
       });
-  }
-  signInWithGoogle(): void {
-    const googleLoginOptions = {
-      scope: 'profile email',
-    };
-    this.authService.signIn(
-      GoogleLoginProvider.PROVIDER_ID,
-      googleLoginOptions
-    );
-  }
-
-  signInWithFB(): void {
-    const fbLoginOptions = {
-      scope: 'public_profile,email',
-      return_scopes: true,
-      enable_profile_selector: true,
-    };
-    this.authService.signIn(FacebookLoginProvider.PROVIDER_ID, fbLoginOptions);
   }
 
   signOut(): void {

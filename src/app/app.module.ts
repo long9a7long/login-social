@@ -11,11 +11,13 @@ import {
   FacebookLoginProvider,
 } from 'angularx-social-login';
 import { SocialConfig } from './configs/social-configs';
+import { LoginModule } from './modules/login/login.module';
 @NgModule({
   declarations: [AppComponent],
   imports: [
     BrowserModule.withServerTransition({ appId: 'serverApp' }),
     SocialLoginModule,
+    LoginModule,
   ],
   providers: [
     {
